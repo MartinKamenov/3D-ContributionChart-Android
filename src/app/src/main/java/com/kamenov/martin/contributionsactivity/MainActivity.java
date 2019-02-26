@@ -95,7 +95,8 @@ public class MainActivity extends Activity implements GetHandler {
         Paint edgePaint = PaintService.createEdgePaint("white");
         Paint wallPaint = PaintService.createWallPaint("red");
         Float rotationCoef = 1f;
-        Float barSize = 10f;
+        Float barSize = 20f;
+        Float sizeCoef = 10f;
 
         ArrayList<Integer> dateContributionsNumbers = contributor.data.dateContributionsNumbers;
 
@@ -106,28 +107,29 @@ public class MainActivity extends Activity implements GetHandler {
             contributionArray[row][col] = dateContributionsNumbers.get(i);
         }
 
-        //int center = contributor.
-
         ArrayList<Object3D> bars = new ArrayList<>();
 
-        float startX = (-(contributionArray[3].length) * barSize) / 2;
-        float y = 0;
+        float startX = (-(contributionArray[0].length) * barSize) / 2;
+        float startY = (-(contributionArray.length) * barSize) / 2;
 
-        for(int i = 0; i < contributionArray[3].length; i++) {
-            float x = (i * barSize) + startX;
 
-            Parallelepiped parallelepiped = figureFactory.createParallelepiped(
-                    x,
-                    y,
-                    0,
-                    barSize,
-                    barSize,
-                    contributionArray[3][i] * 5,
-                    edgePaint,
-                    wallPaint,
-                    rotationCoef
-                    );
-            bars.add(parallelepiped);
+        for(int i = 0; i < contributionArray.length; i++) {
+            for(int j = 0; j < contributionArray[i].length; j++) {
+                float x = (j * barSize) + startX;
+                float y = (i * barSize) + startY;
+                Parallelepiped parallelepiped = figureFactory.createParallelepiped(
+                        x,
+                        y,
+                        (contributionArray[i][j] * sizeCoef) / 2,
+                        barSize,
+                        barSize,
+                        contributionArray[i][j] * sizeCoef,
+                        edgePaint,
+                        wallPaint,
+                        rotationCoef
+                );
+                bars.add(parallelepiped);
+            }
         }
 
         ArrayList<Object3D> allObjects = new ArrayList<>();
