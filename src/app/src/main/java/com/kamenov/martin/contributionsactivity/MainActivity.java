@@ -8,6 +8,8 @@ import android.util.DisplayMetrics;
 import android.view.View;
 import android.view.Window;
 import android.view.WindowManager;
+import android.widget.Button;
+import android.widget.EditText;
 import android.widget.RelativeLayout;
 
 import com.google.gson.Gson;
@@ -32,7 +34,7 @@ import java.util.List;
 import okhttp3.Call;
 import okhttp3.Response;
 
-public class MainActivity extends Activity implements GetHandler {
+public class MainActivity extends Activity implements GetHandler, View.OnClickListener {
 
     private DrawingService drawingService;
     private GamePanel gamePanel;
@@ -40,6 +42,11 @@ public class MainActivity extends Activity implements GetHandler {
     private FigureFactory figureFactory;
     private HttpRequester requester;
     private Gson gson;
+    private View progressContainer;
+    private Button usernameBtn;
+    private EditText usernameInput;
+    private View usernameContainer;
+    private View progressBarContainer;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -52,18 +59,23 @@ public class MainActivity extends Activity implements GetHandler {
         Constants.SCREEN_HEIGHT = dm.heightPixels;
         setContentView(R.layout.activity_main);
 
+        progressContainer = findViewById(R.id.loader_container);
+        progressBarContainer = findViewById(R.id.progressbar_container);
+        usernameContainer = findViewById(R.id.username_container);
+        usernameInput = findViewById(R.id.username_input);
+        usernameBtn = findViewById(R.id.username_btn);
+        usernameBtn.setOnClickListener(this);
+
         requester = new HttpRequester();
         gson = new Gson();
         figureFactory = FigureFactory.getInstance();
         relativeLayout = findViewById(R.id.container);
         drawingService = DrawingService.getInstance(SortingService.getInstance());
-        makeRequestForContributions();
-        //gamePanel = new GamePanel(this, drawingService);
-        //relativeLayout.addView(gamePanel);
     }
 
-    private void makeRequestForContributions() {
-        requester.get(this, "https://github-analyzator-api.herokuapp.com/github/contributions/martinkamenov");
+    private void makeRequestForContributions(String username) {
+        String url = "https://github-analyzator-api.herokuapp.com/github/contributions/" + username;
+        requester.get(this, url);
     }
 
     @Override
@@ -81,6 +93,7 @@ public class MainActivity extends Activity implements GetHandler {
             public void run() {
                 Contributor contributor = gson.fromJson(finalResult, Contributor.class);
                 addDataToFigureFactory(contributor);
+                progressContainer.setVisibility(View.GONE);
                 gamePanel = new GamePanel(MainActivity.this, drawingService);
                 relativeLayout.addView(gamePanel);
             }
@@ -146,5 +159,13 @@ public class MainActivity extends Activity implements GetHandler {
                 wallPaint, edgePaint, rotationCoef, bars);
         allObjects.add(allBars);
         figureFactory.setFigures(allObjects);
+    }
+
+    @Override
+    public void onClick(View view) {
+        String username = usernameInput.getText().toString();
+        usernameContainer.setVisibility(View.GONE);
+        progressBarContainer.setVisibility(View.VISIBLE);
+        makeRequestForContributions(username);
     }
 }
