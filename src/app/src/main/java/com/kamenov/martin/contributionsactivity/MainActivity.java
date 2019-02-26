@@ -1,6 +1,7 @@
 package com.kamenov.martin.contributionsactivity;
 
 import android.app.Activity;
+import android.graphics.Paint;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.DisplayMetrics;
@@ -12,7 +13,12 @@ import android.widget.RelativeLayout;
 import com.google.gson.Gson;
 import com.kamenov.martin.contributionsactivity.constants.Constants;
 import com.kamenov.martin.contributionsactivity.engine.GamePanel;
+import com.kamenov.martin.contributionsactivity.engine.models.game_objects.ComplexObject;
+import com.kamenov.martin.contributionsactivity.engine.models.game_objects.Parallelepiped;
+import com.kamenov.martin.contributionsactivity.engine.models.game_objects.Plane;
+import com.kamenov.martin.contributionsactivity.engine.models.game_objects.contracts.Object3D;
 import com.kamenov.martin.contributionsactivity.engine.services.DrawingService;
+import com.kamenov.martin.contributionsactivity.engine.services.PaintService;
 import com.kamenov.martin.contributionsactivity.engine.services.SortingService;
 import com.kamenov.martin.contributionsactivity.engine.services.factories.FigureFactory;
 import com.kamenov.martin.contributionsactivity.internet.HttpRequester;
@@ -20,6 +26,7 @@ import com.kamenov.martin.contributionsactivity.internet.contracts.GetHandler;
 import com.kamenov.martin.contributionsactivity.models.Contributor;
 
 import java.io.IOException;
+import java.util.ArrayList;
 
 import okhttp3.Call;
 import okhttp3.Response;
@@ -72,6 +79,7 @@ public class MainActivity extends Activity implements GetHandler {
             @Override
             public void run() {
                 Contributor contributor = gson.fromJson(finalResult, Contributor.class);
+                addDataToFigureFactory(contributor);
                 gamePanel = new GamePanel(MainActivity.this, drawingService);
                 relativeLayout.addView(gamePanel);
             }
@@ -81,5 +89,51 @@ public class MainActivity extends Activity implements GetHandler {
     @Override
     public void handleError(Call call, Exception ex) {
 
+    }
+
+    private void addDataToFigureFactory(Contributor contributor) {
+        Paint edgePaint = PaintService.createEdgePaint("white");
+        Paint wallPaint = PaintService.createWallPaint("red");
+        Float rotationCoef = 1f;
+        Float barSize = 10f;
+
+        ArrayList<Integer> dateContributionsNumbers = contributor.data.dateContributionsNumbers;
+
+        int[][] contributionArray = new int[7][(dateContributionsNumbers.size() / 7) + 1];
+        for(int i = 0; i < dateContributionsNumbers.size(); i++) {
+            int row = i % 7;
+            int col = i / 7;
+            contributionArray[row][col] = dateContributionsNumbers.get(i);
+        }
+
+        //int center = contributor.
+
+        ArrayList<Object3D> bars = new ArrayList<>();
+
+        float startX = (-(contributionArray[3].length) * barSize) / 2;
+        float y = 0;
+
+        for(int i = 0; i < contributionArray[3].length; i++) {
+            float x = (i * barSize) + startX;
+
+            Parallelepiped parallelepiped = figureFactory.createParallelepiped(
+                    x,
+                    y,
+                    0,
+                    barSize,
+                    barSize,
+                    contributionArray[3][i] * 5,
+                    edgePaint,
+                    wallPaint,
+                    rotationCoef
+                    );
+            bars.add(parallelepiped);
+        }
+
+        ArrayList<Object3D> allObjects = new ArrayList<>();
+        ComplexObject allBars = figureFactory.createComplexObject(0 ,0 ,0 ,
+                wallPaint, edgePaint, rotationCoef, bars);
+        allObjects.add(allBars);
+        figureFactory.setFigures(allObjects);
     }
 }
