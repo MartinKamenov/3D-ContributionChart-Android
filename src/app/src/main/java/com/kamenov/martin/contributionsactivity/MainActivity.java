@@ -27,6 +27,7 @@ import com.kamenov.martin.contributionsactivity.models.Contributor;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.List;
 
 import okhttp3.Call;
 import okhttp3.Response;
@@ -92,6 +93,7 @@ public class MainActivity extends Activity implements GetHandler {
     }
 
     private void addDataToFigureFactory(Contributor contributor) {
+        int weeksBack = 10;
         Paint edgePaint = PaintService.createEdgePaint("white");
         Paint wallPaint = PaintService.createWallPaint("red");
         Float rotationCoef = 1f;
@@ -99,6 +101,13 @@ public class MainActivity extends Activity implements GetHandler {
         Float sizeCoef = 10f;
 
         ArrayList<Integer> dateContributionsNumbers = contributor.data.dateContributionsNumbers;
+        int startIndex = dateContributionsNumbers.size() - (weeksBack * 7);
+        ArrayList<Integer> newData = new ArrayList<>();
+        for(int i = startIndex; i < dateContributionsNumbers.size(); i++) {
+            newData.add(dateContributionsNumbers.get(i));
+        }
+
+        dateContributionsNumbers = newData;
 
         int[][] contributionArray = new int[7][(dateContributionsNumbers.size() / 7) + 1];
         for(int i = 0; i < dateContributionsNumbers.size(); i++) {
