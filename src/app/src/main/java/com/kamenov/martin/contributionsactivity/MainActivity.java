@@ -109,9 +109,11 @@ public class MainActivity extends Activity implements GetHandler, View.OnClickLi
         int weeksBack = 10;
         Paint edgePaint = PaintService.createEdgePaint("white");
         Paint wallPaint = PaintService.createWallPaint("red");
-        Float rotationCoef = 1f;
+        Float rotationCoef = 0.5f;
         Float barSize = 20f;
         Float sizeCoef = 10f;
+        String type = "Para";
+
 
         ArrayList<Integer> dateContributionsNumbers = contributor.data.dateContributionsNumbers;
         int additionalCommits = 7 - (dateContributionsNumbers.size() % 7);
@@ -120,13 +122,16 @@ public class MainActivity extends Activity implements GetHandler, View.OnClickLi
             dateContributionsNumbers.add(0);
         }
 
-        int startIndex = dateContributionsNumbers.size() - (weeksBack * 7);
-        ArrayList<Integer> newData = new ArrayList<>();
-        for(int i = startIndex; i < dateContributionsNumbers.size(); i++) {
-            newData.add(dateContributionsNumbers.get(i));
-        }
 
-        dateContributionsNumbers = newData;
+        if(weeksBack > 0 && weeksBack < 52) {
+            int startIndex = dateContributionsNumbers.size() - (weeksBack * 7);
+            ArrayList<Integer> newData = new ArrayList<>();
+            for (int i = startIndex; i < dateContributionsNumbers.size(); i++) {
+                newData.add(dateContributionsNumbers.get(i));
+            }
+
+            dateContributionsNumbers = newData;
+        }
 
         int[][] contributionArray = new int[7][(dateContributionsNumbers.size() / 7)];
         for(int i = 0; i < dateContributionsNumbers.size(); i++) {
@@ -147,25 +152,10 @@ public class MainActivity extends Activity implements GetHandler, View.OnClickLi
                 float x = (j * barSize) + startX;
                 float y = (i * barSize) + startY;
 
-                if(contributionArray[i][j] == 0) {
-                    Plane bottomPlane = figureFactory.createPlane(x, y,0 ,edgePaint, wallPaint,
-                            rotationCoef, barSize, barSize);
-                    bars.add(bottomPlane);
-                    continue;
-                }
 
-                Parallelepiped parallelepiped = figureFactory.createParallelepiped(
-                        x,
-                        y,
-                        (contributionArray[i][j] * sizeCoef) / 2,
-                        barSize,
-                        barSize,
-                        contributionArray[i][j] * sizeCoef,
-                        edgePaint,
-                        wallPaint,
-                        rotationCoef
-                );
-                bars.add(parallelepiped);
+                addObjectToComplexObject(type, bars, x, y, contributionArray[i][j],
+                        barSize, edgePaint, wallPaint, rotationCoef, sizeCoef);
+
             }
         }
 
@@ -186,5 +176,41 @@ public class MainActivity extends Activity implements GetHandler, View.OnClickLi
         usernameContainer.setVisibility(View.GONE);
         progressBarContainer.setVisibility(View.VISIBLE);
         makeRequestForContributions(username);
+    }
+
+    private void addObjectToComplexObject(String type,
+                                          ArrayList<Object3D> bars,
+                                          float x,
+                                          float y,
+                                          float contributions,
+                                          float barSize,
+                                          Paint edgePaint,
+                                          Paint wallPaint,
+                                          float rotationCoef,
+                                          float sizeCoef) {
+        switch (type) {
+            case "Para":
+                if(contributions == 0) {
+                    Plane bottomPlane = figureFactory.createPlane(x, y, 0, edgePaint, wallPaint,
+                            rotationCoef, barSize, barSize);
+                    bars.add(bottomPlane);
+                    return;
+                }
+                Parallelepiped parallelepiped = figureFactory.createParallelepiped(
+                        x,
+                        y,
+                        (contributions * sizeCoef) / 2,
+                        barSize,
+                        barSize,
+                        contributions * sizeCoef,
+                        edgePaint,
+                        wallPaint,
+                        rotationCoef
+                );
+                bars.add(parallelepiped);
+                return;
+            case "Lines":
+                return;
+        }
     }
 }
