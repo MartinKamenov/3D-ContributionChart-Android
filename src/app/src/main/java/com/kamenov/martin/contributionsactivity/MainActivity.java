@@ -109,7 +109,7 @@ public class MainActivity extends Activity implements GetHandler, View.OnClickLi
     }
 
     private void addDataToFigureFactory(Contributor contributor) {
-        int weeksBack = 10;
+        int weeksBack = 52;
         Paint edgePaint = PaintService.createEdgePaint("white");
         Paint wallPaint = PaintService.createWallPaint("red");
         Float rotationCoef = 0.5f;
@@ -145,8 +145,8 @@ public class MainActivity extends Activity implements GetHandler, View.OnClickLi
 
         ArrayList<Object3D> bars = new ArrayList<>();
 
-        float startX = (-(contributionArray[0].length) * barSize) / 2;
-        float startY = (-(contributionArray.length) * barSize) / 2;
+        float startX = ((-(contributionArray[0].length) * barSize) / 2) + (barSize / 2);
+        float startY = ((-(contributionArray.length) * barSize) / 2) + (barSize / 2);
 
 
         for(int i = 0; i < contributionArray.length; i++) {
@@ -156,8 +156,9 @@ public class MainActivity extends Activity implements GetHandler, View.OnClickLi
                 float y = (i * barSize) + startY;
 
 
+                float passedBarSize = barSize;
                 addObjectToComplexObject(type, bars, x, y, contributionArray[i][j],
-                        barSize, edgePaint, wallPaint, rotationCoef, sizeCoef);
+                        passedBarSize, edgePaint, wallPaint, rotationCoef, sizeCoef);
 
             }
         }
@@ -215,12 +216,12 @@ public class MainActivity extends Activity implements GetHandler, View.OnClickLi
                 bars.add(parallelepiped);
                 return;
             case "Lines":
-                x += Constants.SCREEN_WIDTH / 2;
-                y += Constants.SCREEN_HEIGHT / 2;
-                DeepPoint firtsPoint = new DeepPoint(x, y,(contributions * sizeCoef) / 2);
+                x = ((Constants.SCREEN_WIDTH / 4) + x / 2);
+                y = ((Constants.SCREEN_HEIGHT / 4) + y / 2);
+                DeepPoint firstPoint = new DeepPoint(x, y,0);
                 DeepPoint secondDeepPoint = new DeepPoint(x, y, contributions * sizeCoef);
 
-                DeepPoint[] points = new DeepPoint[] {firtsPoint, secondDeepPoint};
+                DeepPoint[] points = new DeepPoint[] {firstPoint, secondDeepPoint};
                 ArrayList<DeepPoint[]> parts = new ArrayList<>();
                 parts.add(points);
 
