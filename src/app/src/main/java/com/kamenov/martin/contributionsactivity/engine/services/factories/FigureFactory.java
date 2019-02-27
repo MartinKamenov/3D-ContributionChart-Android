@@ -6,10 +6,13 @@ import com.kamenov.martin.contributionsactivity.constants.Constants;
 import com.kamenov.martin.contributionsactivity.engine.models.game_objects.ComplexObject;
 import com.kamenov.martin.contributionsactivity.engine.models.game_objects.Cube;
 import com.kamenov.martin.contributionsactivity.engine.models.game_objects.Parallelepiped;
+import com.kamenov.martin.contributionsactivity.engine.models.game_objects.PartsObject;
 import com.kamenov.martin.contributionsactivity.engine.models.game_objects.Pyramid;
 import com.kamenov.martin.contributionsactivity.engine.models.game_objects.Plane;
 import com.kamenov.martin.contributionsactivity.engine.models.game_objects.Sphere;
+import com.kamenov.martin.contributionsactivity.engine.models.game_objects.contracts.DeepPoint;
 import com.kamenov.martin.contributionsactivity.engine.models.game_objects.contracts.Object3D;
+import com.kamenov.martin.contributionsactivity.engine.services.PaintService;
 
 import java.util.ArrayList;
 
@@ -99,6 +102,36 @@ public class FigureFactory {
             figures.add(complexObject);
         }
         return complexObject;
+    }
+
+    public PartsObject createPartsObject(float x, float y, float z, Paint edgePaint,
+                                           Paint wallPaint, float rotation, DeepPoint[] points,
+                                         ArrayList<DeepPoint[]> parts) {
+        x += Constants.SCREEN_WIDTH / 2;
+        y += Constants.SCREEN_HEIGHT / 2;
+        PartsObject partsObject = new PartsObject(x, y, z, edgePaint, wallPaint, rotation, points, parts);
+        if(shouldBeAdded) {
+            figures.add(partsObject);
+        }
+        return partsObject;
+    }
+
+    public PartsObject createLine(float x, float y, float z,
+                                  DeepPoint a, DeepPoint b, Paint edgePaint, float rotation) {
+        a.setX(a.getX() + Constants.SCREEN_WIDTH / 2);
+        b.setX(b.getX() + Constants.SCREEN_WIDTH / 2);
+
+        a.setY(a.getY() + Constants.SCREEN_HEIGHT / 2);
+        b.setY(b.getY() + Constants.SCREEN_HEIGHT / 2);
+
+        DeepPoint[] points = new DeepPoint[] {a, b};
+        ArrayList<DeepPoint[]> parts = new ArrayList<>();
+        parts.add(points);
+
+        PartsObject line = createPartsObject(x, y, z, edgePaint, PaintService.createWallPaint("ss"),
+                rotation, points, parts);
+
+        return line;
     }
 
     public ArrayList<Object3D> getFigures() {

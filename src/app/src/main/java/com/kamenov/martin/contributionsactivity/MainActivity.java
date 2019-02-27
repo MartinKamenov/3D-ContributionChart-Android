@@ -17,7 +17,10 @@ import com.kamenov.martin.contributionsactivity.constants.Constants;
 import com.kamenov.martin.contributionsactivity.engine.GamePanel;
 import com.kamenov.martin.contributionsactivity.engine.models.game_objects.ComplexObject;
 import com.kamenov.martin.contributionsactivity.engine.models.game_objects.Parallelepiped;
+import com.kamenov.martin.contributionsactivity.engine.models.game_objects.PartsObject;
 import com.kamenov.martin.contributionsactivity.engine.models.game_objects.Plane;
+import com.kamenov.martin.contributionsactivity.engine.models.game_objects.Pyramid;
+import com.kamenov.martin.contributionsactivity.engine.models.game_objects.contracts.DeepPoint;
 import com.kamenov.martin.contributionsactivity.engine.models.game_objects.contracts.Object3D;
 import com.kamenov.martin.contributionsactivity.engine.services.DrawingService;
 import com.kamenov.martin.contributionsactivity.engine.services.PaintService;
@@ -112,7 +115,7 @@ public class MainActivity extends Activity implements GetHandler, View.OnClickLi
         Float rotationCoef = 0.5f;
         Float barSize = 20f;
         Float sizeCoef = 10f;
-        String type = "Para";
+        String type = "Lines";
 
 
         ArrayList<Integer> dateContributionsNumbers = contributor.data.dateContributionsNumbers;
@@ -159,9 +162,11 @@ public class MainActivity extends Activity implements GetHandler, View.OnClickLi
             }
         }
 
-//        Plane bottomPlane = figureFactory.createPlane(0, 0,0 ,edgePaint, wallPaint,
-//                rotationCoef, contributionArray[0].length * barSize, contributionArray.length * barSize);
-//        bars.add(bottomPlane);
+        if(type == "Lines") {
+            Plane bottomPlane = figureFactory.createPlane(0, 0,0 ,edgePaint, wallPaint,
+                    rotationCoef, contributionArray[0].length * barSize, contributionArray.length * barSize);
+            bars.add(bottomPlane);
+        }
 
         ArrayList<Object3D> allObjects = new ArrayList<>();
         ComplexObject allBars = figureFactory.createComplexObject(0 ,0 ,0 ,
@@ -210,6 +215,38 @@ public class MainActivity extends Activity implements GetHandler, View.OnClickLi
                 bars.add(parallelepiped);
                 return;
             case "Lines":
+                x += Constants.SCREEN_WIDTH / 2;
+                y += Constants.SCREEN_HEIGHT / 2;
+                DeepPoint firtsPoint = new DeepPoint(x, y,(contributions * sizeCoef) / 2);
+                DeepPoint secondDeepPoint = new DeepPoint(x, y, contributions * sizeCoef);
+
+                DeepPoint[] points = new DeepPoint[] {firtsPoint, secondDeepPoint};
+                ArrayList<DeepPoint[]> parts = new ArrayList<>();
+                parts.add(points);
+
+                PartsObject line =  new PartsObject(x, y, 0, edgePaint, wallPaint,
+                        rotationCoef, points, parts);
+                bars.add(line);
+                return;
+            case "Pyramids":
+                if(contributions == 0) {
+                    Plane bottomPlane = figureFactory.createPlane(x, y, 0, edgePaint, wallPaint,
+                            rotationCoef, barSize, barSize);
+                    bars.add(bottomPlane);
+                    return;
+                }
+                Pyramid pyramid = figureFactory.createPyramid(
+                        x,
+                        y,
+                        0,
+                        edgePaint,
+                        wallPaint,
+                        rotationCoef,
+                        barSize,
+                        barSize,
+                        contributions * sizeCoef
+                );
+                bars.add(pyramid);
                 return;
         }
     }
