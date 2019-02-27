@@ -114,6 +114,12 @@ public class MainActivity extends Activity implements GetHandler, View.OnClickLi
         Float sizeCoef = 10f;
 
         ArrayList<Integer> dateContributionsNumbers = contributor.data.dateContributionsNumbers;
+        int additionalCommits = 7 - (dateContributionsNumbers.size() % 7);
+
+        for(int i = 0; i < additionalCommits; i++) {
+            dateContributionsNumbers.add(0);
+        }
+
         int startIndex = dateContributionsNumbers.size() - (weeksBack * 7);
         ArrayList<Integer> newData = new ArrayList<>();
         for(int i = startIndex; i < dateContributionsNumbers.size(); i++) {
@@ -122,7 +128,7 @@ public class MainActivity extends Activity implements GetHandler, View.OnClickLi
 
         dateContributionsNumbers = newData;
 
-        int[][] contributionArray = new int[7][(dateContributionsNumbers.size() / 7) + 1];
+        int[][] contributionArray = new int[7][(dateContributionsNumbers.size() / 7)];
         for(int i = 0; i < dateContributionsNumbers.size(); i++) {
             int row = i % 7;
             int col = i / 7;
@@ -137,8 +143,17 @@ public class MainActivity extends Activity implements GetHandler, View.OnClickLi
 
         for(int i = 0; i < contributionArray.length; i++) {
             for(int j = 0; j < contributionArray[i].length; j++) {
+
                 float x = (j * barSize) + startX;
                 float y = (i * barSize) + startY;
+
+                if(contributionArray[i][j] == 0) {
+                    Plane bottomPlane = figureFactory.createPlane(x, y,0 ,edgePaint, wallPaint,
+                            rotationCoef, barSize, barSize);
+                    bars.add(bottomPlane);
+                    continue;
+                }
+
                 Parallelepiped parallelepiped = figureFactory.createParallelepiped(
                         x,
                         y,
@@ -153,6 +168,10 @@ public class MainActivity extends Activity implements GetHandler, View.OnClickLi
                 bars.add(parallelepiped);
             }
         }
+
+//        Plane bottomPlane = figureFactory.createPlane(0, 0,0 ,edgePaint, wallPaint,
+//                rotationCoef, contributionArray[0].length * barSize, contributionArray.length * barSize);
+//        bars.add(bottomPlane);
 
         ArrayList<Object3D> allObjects = new ArrayList<>();
         ComplexObject allBars = figureFactory.createComplexObject(0 ,0 ,0 ,
