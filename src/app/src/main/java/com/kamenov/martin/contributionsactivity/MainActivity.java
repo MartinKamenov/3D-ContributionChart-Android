@@ -14,6 +14,7 @@ import android.widget.RelativeLayout;
 
 import com.google.gson.Gson;
 import com.kamenov.martin.contributionsactivity.constants.Constants;
+import com.kamenov.martin.contributionsactivity.contracts.BarType;
 import com.kamenov.martin.contributionsactivity.engine.GamePanel;
 import com.kamenov.martin.contributionsactivity.engine.models.game_objects.ComplexObject;
 import com.kamenov.martin.contributionsactivity.engine.models.game_objects.Parallelepiped;
@@ -115,7 +116,7 @@ public class MainActivity extends Activity implements GetHandler, View.OnClickLi
         Float rotationCoef = 0.5f;
         Float barSize = 20f;
         Float sizeCoef = 10f;
-        String type = "Lines";
+        BarType type = BarType.Line;
 
 
         ArrayList<Integer> dateContributionsNumbers = contributor.data.dateContributionsNumbers;
@@ -163,10 +164,24 @@ public class MainActivity extends Activity implements GetHandler, View.OnClickLi
             }
         }
 
-        if(type == "Lines") {
-            Plane bottomPlane = figureFactory.createPlane(0, 0,0 ,edgePaint, wallPaint,
-                    rotationCoef, contributionArray[0].length * barSize, contributionArray.length * barSize);
-            bars.add(bottomPlane);
+        if(type == BarType.Line) {
+            float aLength = contributionArray[0].length * barSize;
+            float bLength = contributionArray[0].length * barSize;
+            float bottomSize = ((weeksBack / 4)) * barSize;
+
+            for (int i = 0; i < weeksBack / 4; i++) {
+
+
+                Plane bottomPlane = figureFactory.createPlane(
+                        (i * bottomSize) + startX,
+                        0,
+                        0,
+                        edgePaint, wallPaint,
+                        rotationCoef,
+                        aLength / (weeksBack / 4),
+                        bLength);
+                bars.add(bottomPlane);
+            }
         }
 
         ArrayList<Object3D> allObjects = new ArrayList<>();
@@ -184,7 +199,7 @@ public class MainActivity extends Activity implements GetHandler, View.OnClickLi
         makeRequestForContributions(username);
     }
 
-    private void addObjectToComplexObject(String type,
+    private void addObjectToComplexObject(BarType type,
                                           ArrayList<Object3D> bars,
                                           float x,
                                           float y,
@@ -195,7 +210,7 @@ public class MainActivity extends Activity implements GetHandler, View.OnClickLi
                                           float rotationCoef,
                                           float sizeCoef) {
         switch (type) {
-            case "Para":
+            case Parallelepiped:
                 if(contributions == 0) {
                     Plane bottomPlane = figureFactory.createPlane(x, y, 0, edgePaint, wallPaint,
                             rotationCoef, barSize, barSize);
@@ -215,7 +230,7 @@ public class MainActivity extends Activity implements GetHandler, View.OnClickLi
                 );
                 bars.add(parallelepiped);
                 return;
-            case "Lines":
+            case Line:
                 x = ((Constants.SCREEN_WIDTH / 4) + x / 2);
                 y = ((Constants.SCREEN_HEIGHT / 4) + y / 2);
                 DeepPoint firstPoint = new DeepPoint(x, y,0);
@@ -229,7 +244,7 @@ public class MainActivity extends Activity implements GetHandler, View.OnClickLi
                         rotationCoef, points, parts);
                 bars.add(line);
                 return;
-            case "Pyramids":
+            case Pyramid:
                 if(contributions == 0) {
                     Plane bottomPlane = figureFactory.createPlane(x, y, 0, edgePaint, wallPaint,
                             rotationCoef, barSize, barSize);
