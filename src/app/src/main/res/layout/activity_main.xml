@@ -29,8 +29,8 @@
                     android:layout_height="wrap_content"
                     android:textAlignment="center"
                     android:textColor="#ffffff"
-                    android:textColorHint="@color/colorAccent"
-                    android:hint="Username"/>
+                    android:textColorHint="#aaaaaa"
+                    android:hint="Github username"/>
                 <Button
                     android:id="@+id/username_btn"
                     android:text="Go"

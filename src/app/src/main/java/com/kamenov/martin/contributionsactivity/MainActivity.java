@@ -165,20 +165,19 @@ public class MainActivity extends Activity implements GetHandler, View.OnClickLi
         }
 
         if(type == BarType.Line) {
-            float aLength = contributionArray[0].length * barSize;
-            float bLength = contributionArray[0].length * barSize;
-            float bottomSize = ((weeksBack / 4)) * barSize;
+            float aLength = (contributionArray[0].length * barSize) / (weeksBack / 4);
+            float bLength = contributionArray.length * barSize;
 
             for (int i = 0; i < weeksBack / 4; i++) {
 
 
                 Plane bottomPlane = figureFactory.createPlane(
-                        (i * bottomSize) + startX,
+                        (i * aLength) + startX,
                         0,
                         0,
                         edgePaint, wallPaint,
                         rotationCoef,
-                        aLength / (weeksBack / 4),
+                        aLength,
                         bLength);
                 bars.add(bottomPlane);
             }
