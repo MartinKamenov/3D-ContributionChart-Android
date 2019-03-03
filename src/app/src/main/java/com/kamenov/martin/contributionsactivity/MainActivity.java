@@ -10,7 +10,9 @@ import android.view.Window;
 import android.view.WindowManager;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.RadioGroup;
 import android.widget.RelativeLayout;
+import android.widget.Toast;
 
 import com.google.gson.Gson;
 import com.kamenov.martin.contributionsactivity.constants.Constants;
@@ -29,6 +31,7 @@ import com.kamenov.martin.contributionsactivity.engine.services.SortingService;
 import com.kamenov.martin.contributionsactivity.engine.services.factories.FigureFactory;
 import com.kamenov.martin.contributionsactivity.internet.HttpRequester;
 import com.kamenov.martin.contributionsactivity.internet.contracts.GetHandler;
+import com.kamenov.martin.contributionsactivity.models.ContributionDate;
 import com.kamenov.martin.contributionsactivity.models.Contributor;
 
 import java.io.IOException;
@@ -38,7 +41,7 @@ import java.util.List;
 import okhttp3.Call;
 import okhttp3.Response;
 
-public class MainActivity extends Activity implements GetHandler, View.OnClickListener {
+public class MainActivity extends Activity implements GetHandler, View.OnClickListener, RadioGroup.OnCheckedChangeListener {
 
     private DrawingService drawingService;
     private GamePanel gamePanel;
@@ -51,6 +54,8 @@ public class MainActivity extends Activity implements GetHandler, View.OnClickLi
     private EditText usernameInput;
     private View usernameContainer;
     private View progressBarContainer;
+    private int weeksBack;
+    private BarType type;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -63,12 +68,18 @@ public class MainActivity extends Activity implements GetHandler, View.OnClickLi
         Constants.SCREEN_HEIGHT = dm.heightPixels;
         setContentView(R.layout.activity_main);
 
+        type = BarType.Line;
+        weeksBack = 52;
+
         progressContainer = findViewById(R.id.loader_container);
         progressBarContainer = findViewById(R.id.progressbar_container);
         usernameContainer = findViewById(R.id.username_container);
         usernameInput = findViewById(R.id.username_input);
         usernameBtn = findViewById(R.id.username_btn);
         usernameBtn.setOnClickListener(this);
+
+        RadioGroup radioGroup = (RadioGroup) findViewById(R.id.type_bars);
+        radioGroup.setOnCheckedChangeListener(this);
 
         requester = new HttpRequester();
         gson = new Gson();
@@ -106,42 +117,51 @@ public class MainActivity extends Activity implements GetHandler, View.OnClickLi
 
     @Override
     public void handleError(Call call, Exception ex) {
-
+        final String exeption = ex.getMessage().toString();
+        runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                Toast.makeText(MainActivity.this, exeption, Toast.LENGTH_SHORT).show();
+                progressContainer.setVisibility(View.VISIBLE);
+                progressBarContainer.setVisibility(View.GONE);
+            }
+        });
     }
 
     private void addDataToFigureFactory(Contributor contributor) {
-        int weeksBack = 52;
         Paint edgePaint = PaintService.createEdgePaint("white");
         Paint wallPaint = PaintService.createWallPaint("red");
         Float rotationCoef = 0.5f;
         Float barSize = 20f;
         Float sizeCoef = 10f;
-        BarType type = BarType.Line;
 
 
-        ArrayList<Integer> dateContributionsNumbers = contributor.data.dateContributionsNumbers;
-        int additionalCommits = 7 - (dateContributionsNumbers.size() % 7);
+        ArrayList<ContributionDate> fullDateContributionInformation = contributor.data.fullDateConributionInformation;
+        int additionalCommits = 7 - (fullDateContributionInformation.size() % 7);
 
         for(int i = 0; i < additionalCommits; i++) {
-            dateContributionsNumbers.add(0);
+            ContributionDate emptyContributionDate = new ContributionDate();
+            emptyContributionDate.color = "#ebedf0";
+            emptyContributionDate.contributions = 0;
+            fullDateContributionInformation.add(emptyContributionDate);
         }
 
 
         if(weeksBack > 0 && weeksBack < 52) {
-            int startIndex = dateContributionsNumbers.size() - (weeksBack * 7);
-            ArrayList<Integer> newData = new ArrayList<>();
-            for (int i = startIndex; i < dateContributionsNumbers.size(); i++) {
-                newData.add(dateContributionsNumbers.get(i));
+            int startIndex = fullDateContributionInformation.size() - (weeksBack * 7);
+            ArrayList<ContributionDate> newData = new ArrayList<>();
+            for (int i = startIndex; i < fullDateContributionInformation.size(); i++) {
+                newData.add(fullDateContributionInformation.get(i));
             }
 
-            dateContributionsNumbers = newData;
+            fullDateContributionInformation = newData;
         }
 
-        int[][] contributionArray = new int[7][(dateContributionsNumbers.size() / 7)];
-        for(int i = 0; i < dateContributionsNumbers.size(); i++) {
+        ContributionDate[][] contributionArray = new ContributionDate[7][(fullDateContributionInformation.size() / 7)];
+        for(int i = 0; i < fullDateContributionInformation.size(); i++) {
             int row = i % 7;
             int col = i / 7;
-            contributionArray[row][col] = dateContributionsNumbers.get(i);
+            contributionArray[row][col] = fullDateContributionInformation.get(i);
         }
 
         ArrayList<Object3D> bars = new ArrayList<>();
@@ -158,7 +178,7 @@ public class MainActivity extends Activity implements GetHandler, View.OnClickLi
 
 
                 float passedBarSize = barSize;
-                addObjectToComplexObject(type, bars, x, y, contributionArray[i][j],
+                addObjectToComplexObject(type, bars, x, y, contributionArray[i][j].contributions,
                         passedBarSize, edgePaint, wallPaint, rotationCoef, sizeCoef);
 
             }
@@ -263,6 +283,27 @@ public class MainActivity extends Activity implements GetHandler, View.OnClickLi
                 );
                 bars.add(pyramid);
                 return;
+        }
+    }
+
+    @Override
+    public void onCheckedChanged(RadioGroup radioGroup, int i) {
+        switch(i){
+            case R.id.bars:
+                Toast.makeText(this, "Bars", Toast.LENGTH_SHORT).show();
+                type = BarType.Parallelepiped;
+                weeksBack = 10;
+                break;
+            case R.id.lines:
+                Toast.makeText(this, "Lines", Toast.LENGTH_SHORT).show();
+                type = BarType.Line;
+                weeksBack = 52;
+                break;
+            case R.id.pyramids:
+                Toast.makeText(this, "Pyramids", Toast.LENGTH_SHORT).show();
+                type = BarType.Pyramid;
+                weeksBack = 20;
+                break;
         }
     }
 }
