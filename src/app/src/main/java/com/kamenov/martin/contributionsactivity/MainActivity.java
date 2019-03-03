@@ -130,10 +130,9 @@ public class MainActivity extends Activity implements GetHandler, View.OnClickLi
 
     private void addDataToFigureFactory(Contributor contributor) {
         Paint edgePaint = PaintService.createEdgePaint("white");
-        Paint wallPaint = PaintService.createWallPaint("red");
         Float rotationCoef = 0.5f;
-        Float barSize = 20f;
-        Float sizeCoef = 10f;
+        Float barSize = 40f;
+        Float sizeCoef = 20f;
 
 
         ArrayList<ContributionDate> fullDateContributionInformation = contributor.data.fullDateConributionInformation;
@@ -178,6 +177,10 @@ public class MainActivity extends Activity implements GetHandler, View.OnClickLi
 
 
                 float passedBarSize = barSize;
+
+
+                Paint wallPaint = PaintService.createWallPaint(contributionArray[i][j].color);
+
                 addObjectToComplexObject(type, bars, x, y, contributionArray[i][j].contributions,
                         passedBarSize, edgePaint, wallPaint, rotationCoef, sizeCoef);
 
@@ -189,6 +192,8 @@ public class MainActivity extends Activity implements GetHandler, View.OnClickLi
             float bLength = contributionArray.length * barSize;
 
             for (int i = 0; i < weeksBack / 4; i++) {
+
+                Paint wallPaint = PaintService.createWallPaint("#ebedf0");
 
 
                 Plane bottomPlane = figureFactory.createPlane(
@@ -204,6 +209,7 @@ public class MainActivity extends Activity implements GetHandler, View.OnClickLi
         }
 
         ArrayList<Object3D> allObjects = new ArrayList<>();
+        Paint wallPaint = PaintService.createWallPaint("#ebedf0");
         ComplexObject allBars = figureFactory.createComplexObject(0 ,0 ,0 ,
                 wallPaint, edgePaint, rotationCoef, bars);
         allObjects.add(allBars);
