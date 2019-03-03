@@ -36,7 +36,9 @@ import com.kamenov.martin.contributionsactivity.models.Contributor;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import okhttp3.Call;
 import okhttp3.Response;
@@ -56,6 +58,8 @@ public class MainActivity extends Activity implements GetHandler, View.OnClickLi
     private View progressBarContainer;
     private int weeksBack;
     private BarType type;
+    private Map<String, Paint> edgePaints;
+    private Map<String, Paint> wallPaints;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -80,6 +84,9 @@ public class MainActivity extends Activity implements GetHandler, View.OnClickLi
 
         RadioGroup radioGroup = (RadioGroup) findViewById(R.id.type_bars);
         radioGroup.setOnCheckedChangeListener(this);
+
+        wallPaints = new HashMap<>();
+        edgePaints = new HashMap<>();
 
         requester = new HttpRequester();
         gson = new Gson();
@@ -179,7 +186,21 @@ public class MainActivity extends Activity implements GetHandler, View.OnClickLi
                 float passedBarSize = barSize;
 
 
-                Paint wallPaint = PaintService.createWallPaint(contributionArray[i][j].color);
+                if(!wallPaints.containsKey(contributionArray[i][j].color)) {
+                    wallPaints.put(contributionArray[i][j].color,
+                             PaintService.createWallPaint(contributionArray[i][j].color));
+                }
+
+                Paint wallPaint = wallPaints.get(contributionArray[i][j].color);
+
+                if(type == BarType.Line) {
+                    if(!edgePaints.containsKey(contributionArray[i][j].color)) {
+                        edgePaints.put(contributionArray[i][j].color,
+                                PaintService.createEdgePaint(contributionArray[i][j].color));
+                    }
+
+                    edgePaint = edgePaints.get(contributionArray[i][j].color);
+                }
 
                 addObjectToComplexObject(type, bars, x, y, contributionArray[i][j].contributions,
                         passedBarSize, edgePaint, wallPaint, rotationCoef, sizeCoef);
@@ -190,17 +211,16 @@ public class MainActivity extends Activity implements GetHandler, View.OnClickLi
         if(type == BarType.Line) {
             float aLength = (contributionArray[0].length * barSize) / (weeksBack / 4);
             float bLength = contributionArray.length * barSize;
+            Paint wallPaint = PaintService.createWallPaint("#ebedf0");
 
             for (int i = 0; i < weeksBack / 4; i++) {
-
-                Paint wallPaint = PaintService.createWallPaint("#ebedf0");
-
 
                 Plane bottomPlane = figureFactory.createPlane(
                         (i * aLength) + startX,
                         0,
                         0,
-                        edgePaint, wallPaint,
+                        edgePaint,
+                        wallPaint,
                         rotationCoef,
                         aLength,
                         bLength);
